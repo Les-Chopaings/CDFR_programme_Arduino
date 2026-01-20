@@ -2,13 +2,79 @@
 #include "config.h"
 #include <Servo.h>
 #include <AccelStepper.h>
-Servo bascule;
+#include <Wire.h>
+#include "servoPlus.h"
+#include "conversionArray.h"
+
+ServoPlus* bascule;
+ServoPlus* slider1;
+ServoPlus* slider2;
+ServoPlus* slider3;
+ServoPlus* slider4;
+ServoPlus* rotation1;
+ServoPlus* rotation2;
+ServoPlus* rotation3;
+ServoPlus* rotation4;
+ServoPlus* temp;
+
+uint8_t onReceiveData[BUFFERONRECEIVESIZE];
+uint8_t onRequestData[BUFFERONREQUESTSIZE];
+int lenghtOnRequest;
+void receiveEvent(int numBytes);
+void requestEvent();
+
 AccelStepper stepper1(AccelStepper::DRIVER, STEPPER1_STEP, STEPPER1_DIR);
 int pomp_list[] = {POMPE1, POMPE2, POMPE3, POMPE4};
-unsigned long T_start;
-int toggle = 0;
+int toggle = 1;
+
+int limitWithSlider1(int angle) {
+  angle = (angle > slider2->get()) ? slider2->get() : angle;
+  return angle;
+}
+int limitWithSlider2(int angle) {
+  angle = (angle > slider3->get()) ? slider3->get() : angle;
+  angle = (angle < slider1->get()) ? slider1->get() : angle;
+  return angle;
+}
+int limitWithSlider3(int angle) {
+  angle = (angle > slider4->get()) ? slider4->get() : angle;
+  angle = (angle < slider2->get()) ? slider2->get() : angle;
+  return angle;
+}
+int limitWithSlider4(int angle) {
+  angle = (angle < slider3->get()) ? slider3->get() : angle;
+  return angle;
+}
+
+int limitWithRotation1(int angle) {
+  angle = (slider1->get() <= 40 && slider2->get() == 180) ? angle : rotation1->get();
+  return angle;
+}
+int limitWithRotation2(int angle) {
+  angle = (slider1->get() == 0 && slider2->get() == 40 && slider3->get() == 180) ? angle : rotation2->get();
+  return angle;
+}
+int limitWithRotation3(int angle) {
+  angle = (slider2->get() == 0 && slider3->get() == 40 && slider4->get() == 180) ? angle : rotation3->get();
+  return angle;
+}
+int limitWithRotation4(int angle) {
+  angle = (slider3->get() == 0 && slider4->get() >= 40) ? angle : rotation4->get();
+  return angle;
+}
 
 void setup() {
+  bascule = new ServoPlus(BASCULE,0,180,0);
+  slider1 = new ServoPlus(SLIDER1,90);
+  slider2 = new ServoPlus(SLIDER2,90);
+  slider3 = new ServoPlus(SLIDER3,90);
+  slider4 = new ServoPlus(SLIDER4,90);
+  rotation1 = new ServoPlus(ROTATION1,0,0,165);
+  rotation2 = new ServoPlus(ROTATION2,0,0,165);
+  rotation3 = new ServoPlus(ROTATION3,0,10,180);
+  rotation4 = new ServoPlus(ROTATION4,0,10,180);
+  temp = new ServoPlus(TEMP,0,180,90);
+
   // put your setup code here, to run once:
   Serial.begin(115200);
   Serial.println("Start");
@@ -16,45 +82,229 @@ void setup() {
   digitalWrite(STEPPER_RESET, 1);
   pinMode(STEPPER_SLEEP, OUTPUT);
   digitalWrite(STEPPER_SLEEP, 1);
+  pinMode(STEPPER1_ENABLE, OUTPUT);
+  digitalWrite(STEPPER1_ENABLE, 0);
   stepper1.enableOutputs();
-  stepper1.setAcceleration(1e4);
-  stepper1.setMaxSpeed(2e6);
-  T_start = millis();
+  stepper1.setAcceleration(5000);
+  stepper1.setMaxSpeed(700);
 
   pinMode(POMPE1, OUTPUT);
   pinMode(POMPE2, OUTPUT);
   pinMode(POMPE3, OUTPUT);
   pinMode(POMPE4, OUTPUT);
 
-  bascule.attach(BASCULE);
-  bascule.write(180);
-  
+  pinMode(MOSFET1, OUTPUT);
+  pinMode(MOSFET2, OUTPUT);
+  pinMode(MOSFET3, OUTPUT);
+  pinMode(MOSFET4, OUTPUT);
+
+  slider1->setup();
+  slider2->setup();
+  slider3->setup();
+  slider4->setup();
+  rotation1->setup();
+  rotation2->setup();
+  rotation3->setup();
+  rotation4->setup();
+  bascule->setup();
+  temp->setup();
+
+  slider1->setFunctionChecker(limitWithSlider1);
+  slider2->setFunctionChecker(limitWithSlider2);
+  slider3->setFunctionChecker(limitWithSlider3);
+  slider4->setFunctionChecker(limitWithSlider4);
+  rotation1->setFunctionChecker(limitWithRotation1);
+  rotation2->setFunctionChecker(limitWithRotation2);
+  rotation3->setFunctionChecker(limitWithRotation3);
+  rotation4->setFunctionChecker(limitWithRotation4);
+
+  slider1->write(90);
+  slider2->write(90);
+  slider3->write(90);
+  slider4->write(90);
+  rotation1->write(0);
+  rotation2->write(0);
+  rotation3->write(0);
+  rotation4->write(0);
+  bascule->write(0);
+  temp->write(0);
+
+  Wire.begin(100);
+  Wire.setTimeout(1000);
+  Wire.onReceive(receiveEvent);
+  Wire.onRequest(requestEvent);
+
+  temp->write(180);
+
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  //digitalWrite(POMPE1, HIGH);
-  
-  // for (int i = 0; i < 5; i++){
-  //   digitalWrite(pomp_list[i], HIGH);
-  //   Serial.println("high");
-  //   delay(1000);
-  //   digitalWrite(pomp_list[i], LOW);
-  //   Serial.println("low");
-  //   delay(1000);
-  // }
+  stepper1.run();
+}
 
-  // stepper1.run();
-  // if ((millis() - T_start) > 5000){
-  //   stepper1.moveTo(1e4*toggle);
-  //   T_start = millis();
-  //   toggle = !toggle;
-  //   Serial.println(T_start);
-  //   Serial.println(toggle*1e4);
-  // }
 
-  // delay(1000);
-  // bascule.write(0);
-  // delay(1000);
-  // bascule.write(180);
+
+void receiveEvent(int numBytes) {
+  int i = 0;
+  while (Wire.available() > 0) {
+    if(i<BUFFERONRECEIVESIZE){
+      onReceiveData[i] = Wire.read();
+      i++;
+    }
+    else{
+      Wire.read();
+    }
+
+  }
+
+  int commande;
+  arrayToParameter(onReceiveData,BUFFERONRECEIVESIZE,"1%d",&commande);
+  Serial.print(onReceiveData[0]);
+  Serial.print(" ");
+  Serial.print(onReceiveData[1]);
+  Serial.print(" ");
+  Serial.println(onReceiveData[2]);
+  switch (commande)
+  {
+  case 1 :{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    bascule->write(position);
+    break;
+  }
+
+  case 2 :{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    slider1->write(position);
+    break;
+  }
+
+  case 3 :{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    slider2->write(position);
+    break;
+  }
+
+  case 4 :{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    slider3->write(position);
+    break;
+  }
+
+  case 5 :{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    slider4->write(position);
+    break;
+  }
+
+  case 6 :{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    rotation1->write(position);
+    break;
+  }
+
+  case 7 :{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    rotation2->write(position);
+    break;
+  }
+
+  case 8 :{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    rotation3->write(position);
+    break;
+  }
+
+  case 9 :{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    rotation4->write(position);
+    break;
+  }
+
+  case 10 :{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    temp->write(position);
+    Serial.print("POS : ");
+    Serial.println(position);
+    break;
+  }
+
+  case 11:{
+    //SERVO1
+    break;
+  }
+
+  case 12:{
+    //SERVO2
+    break;
+  }
+
+  case 20:{
+    int position = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
+    stepper1.moveTo(position);
+    break;
+  }
+
+  case 21:{
+    int enable = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
+    digitalWrite(STEPPER1_ENABLE, enable);
+    break;
+  }
+
+  case 30:{
+    int enable = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
+    digitalWrite(POMPE1, enable);
+    break;
+  }
+
+  case 31:{
+    int enable = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
+    digitalWrite(POMPE2, enable);
+    break;
+  }
+
+  case 32:{
+    int enable = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
+    digitalWrite(POMPE3, enable);
+    break;
+  }
+
+  case 33:{
+    int enable = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
+    digitalWrite(POMPE4, enable);
+    break;
+  }
+
+  default:
+    break;
+  }
+}
+
+void requestEvent(){
+  switch (onReceiveData[0])
+  {
+  // case 100 :
+  //   parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_1));
+  //   lenghtOnRequest = 2;
+  //   break;
+
+  default:
+    break;
+  }
+  Wire.write(onRequestData, lenghtOnRequest);
 }

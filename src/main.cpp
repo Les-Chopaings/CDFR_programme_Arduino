@@ -93,6 +93,9 @@ void setup() {
   pinMode(POMPE3, OUTPUT);
   pinMode(POMPE4, OUTPUT);
 
+  pinMode(SERVO1, INPUT_PULLUP);
+  pinMode(SERVO2, INPUT_PULLUP);
+
   pinMode(MOSFET1, OUTPUT);
   pinMode(MOSFET2, OUTPUT);
   pinMode(MOSFET3, OUTPUT);
@@ -145,6 +148,27 @@ void loop() {
 
 
 void receiveEvent(int numBytes) {
+  //Receive command and associate an action with the following table:
+  //   commande   |   action
+  //      1       |   Bascule (position)
+  //      2       |   Slider 1 (position)
+  //      3       |   Slider 2 (position)
+  //      4       |   Slider 3 (position)
+  //      5       |   Slider 4 (position)
+  //      6       |   Rotation 1 (angle)
+  //      7       |   Rotation 2 (angle)
+  //      8       |   Rotation 3 (angle)
+  //      9       |   Rotation 4 (angle)
+  //     10       |   Debug position sur serial
+  //     11       |   Servo 1
+  //     12       |   Servo 2
+  //     20       |   Stepper 1 (moveTo position)
+  //     21       |   Stepper 1 (Enable, bool)
+  //     30       |   Pompe 1 (Enable, bool)
+  //     31       |   Pompe 2 (Enable, bool)
+  //     32       |   Pompe 3 (Enable, bool)
+  //     33       |   Pompe 4 (Enable, bool)
+
   int i = 0;
   while (Wire.available() > 0) {
     if(i<BUFFERONRECEIVESIZE){
@@ -167,6 +191,7 @@ void receiveEvent(int numBytes) {
   switch (commande)
   {
   case 1 :{
+    //BASCULE
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     bascule->write(position);
@@ -174,6 +199,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 2 :{
+    //SLIDER 1
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     slider1->write(position);
@@ -181,6 +207,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 3 :{
+    //SLIDER 2
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     slider2->write(position);
@@ -188,6 +215,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 4 :{
+    //SLIDER 3
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     slider3->write(position);
@@ -195,6 +223,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 5 :{
+    //SLIDER 4
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     slider4->write(position);
@@ -202,6 +231,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 6 :{
+    //ROTATION 1
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     rotation1->write(position);
@@ -209,6 +239,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 7 :{
+    //ROTATION 2
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     rotation2->write(position);
@@ -216,6 +247,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 8 :{
+    //ROTATION 3
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     rotation3->write(position);
@@ -223,6 +255,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 9 :{
+    //ROTATION 4
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     rotation4->write(position);
@@ -230,6 +263,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 10 :{
+    //DEBUG POSITION SUR SERIAL
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     temp->write(position);
@@ -239,7 +273,9 @@ void receiveEvent(int numBytes) {
   }
 
   case 11:{
-    //SERVO1
+    //SERVO1 
+    //temporaire : lire des infos de capteur (?)
+
     break;
   }
 
@@ -249,6 +285,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 20:{
+    //STEPPER 1 MOVE-TO-POSITION
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     stepper1.moveTo(position);
@@ -256,6 +293,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 21:{
+    //STEPPER 1 ENABLE
     int enable = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
     digitalWrite(STEPPER1_ENABLE, enable);
@@ -263,6 +301,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 30:{
+    //POMPE 1
     int enable = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
     digitalWrite(POMPE1, enable);
@@ -270,6 +309,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 31:{
+    //POMPE 2
     int enable = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
     digitalWrite(POMPE2, enable);
@@ -277,6 +317,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 32:{
+    //POMPE 3
     int enable = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
     digitalWrite(POMPE3, enable);
@@ -284,6 +325,7 @@ void receiveEvent(int numBytes) {
   }
 
   case 33:{
+    //POMPE 4
     int enable = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
     digitalWrite(POMPE4, enable);
@@ -298,10 +340,23 @@ void receiveEvent(int numBytes) {
 void requestEvent(){
   switch (onReceiveData[0])
   {
-  // case 100 :
+  // case 100 :{
   //   parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_1));
   //   lenghtOnRequest = 2;
   //   break;
+  // }
+
+  case 101 :{
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(SERVO1));
+    lenghtOnRequest = 2;
+    break;
+  }
+
+  case 102 :{
+    parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(SERVO2));
+    lenghtOnRequest = 2;
+    break;
+  }
 
   default:
     break;

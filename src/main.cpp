@@ -47,19 +47,23 @@ int limitWithSlider4(int angle) {
 }
 
 int limitWithRotation1(int angle) {
-  angle = (slider1->get() <= 40 && slider2->get() == 180) ? angle : rotation1->get();
+  bool fullRotation = abs(angle - rotation1->get()) > 120;
+  angle = ((slider1->get() <= 40 && slider2->get() == 180) || fullRotation!=false) ? angle : rotation1->get();
   return angle;
 }
 int limitWithRotation2(int angle) {
-  angle = (slider1->get() == 0 && slider2->get() == 40 && slider3->get() == 180) ? angle : rotation2->get();
+  bool fullRotation = abs(angle - rotation2->get()) > 120;
+  angle = ((slider1->get() == 0 && slider2->get() == 40 && slider3->get() == 180) || fullRotation!=false) ? angle : rotation2->get();
   return angle;
 }
 int limitWithRotation3(int angle) {
-  angle = (slider2->get() == 0 && slider3->get() == 40 && slider4->get() == 180) ? angle : rotation3->get();
+  bool fullRotation = abs(angle - rotation3->get()) > 120;
+  angle = ((slider2->get() == 0 && slider3->get() == 40 && slider4->get() == 180) || fullRotation!=false) ? angle : rotation3->get();
   return angle;
 }
 int limitWithRotation4(int angle) {
-  angle = (slider3->get() == 0 && slider4->get() >= 40) ? angle : rotation4->get();
+  bool fullRotation = abs(angle - rotation4->get()) > 120;
+  angle = ((slider3->get() == 0 && slider4->get() >= 40) || fullRotation!=false) ? angle : rotation4->get();
   return angle;
 }
 

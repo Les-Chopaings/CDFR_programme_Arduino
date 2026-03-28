@@ -137,8 +137,6 @@ void setup() {
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
 
-  temp->write(180);
-
 }
 
 void loop() {

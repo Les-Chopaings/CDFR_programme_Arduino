@@ -23,6 +23,9 @@ int lenghtOnRequest;
 void receiveEvent(int numBytes);
 void requestEvent();
 
+int countCommande;
+int prevcountCommande;
+
 AccelStepper stepper1(AccelStepper::DRIVER, STEPPER1_STEP, STEPPER1_DIR);
 int pomp_list[] = {POMPE1, POMPE2, POMPE3, POMPE4};
 int toggle = 1;
@@ -141,10 +144,17 @@ void setup() {
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
 
+  countCommande = 0;
+  prevcountCommande = 0;
+
 }
 
 void loop() {
   stepper1.run();
+  if(countCommande != prevcountCommande){
+    Serial.println(countCommande);
+    prevcountCommande = countCommande;
+  }
 }
 
 
@@ -161,7 +171,7 @@ void receiveEvent(int numBytes) {
   //      7       |   Rotation 2 (angle)
   //      8       |   Rotation 3 (angle)
   //      9       |   Rotation 4 (angle)
-  //     10       |   Debug position sur serial
+  //     10       |   temperature
   //     11       |   Servo 1
   //     12       |   Servo 2
   //     20       |   Stepper 1 (moveTo position)
@@ -184,12 +194,7 @@ void receiveEvent(int numBytes) {
   }
 
   int commande;
-  arrayToParameter(onReceiveData,BUFFERONRECEIVESIZE,"1%d",&commande);
-  Serial.print(onReceiveData[0]);
-  Serial.print(" ");
-  Serial.print(onReceiveData[1]);
-  Serial.print(" ");
-  Serial.println(onReceiveData[2]);
+  arrayToParameter(onReceiveData,BUFFERONRECEIVESIZE,"1%u",&commande);
   switch (commande)
   {
   case 1 :{
@@ -265,12 +270,10 @@ void receiveEvent(int numBytes) {
   }
 
   case 10 :{
-    //DEBUG POSITION SUR SERIAL
+    //TEMPERATURE
     int position = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&position);
     temp->write(position);
-    Serial.print("POS : ");
-    Serial.println(position);
     break;
   }
 
@@ -331,6 +334,12 @@ void receiveEvent(int numBytes) {
     int enable = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
     digitalWrite(POMPE4, enable);
+    break;
+  }
+
+  case 200:{
+    //TEST
+    countCommande++;
     break;
   }
 

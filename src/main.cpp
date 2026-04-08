@@ -349,13 +349,13 @@ void receiveEvent(int numBytes) {
 }
 
 void requestEvent(){
+  //Receive command and associate an action with the following table:
+  //   commande   |   action
+  //    101       |   Color button
+  //    102       |   start magnet
+
   switch (onReceiveData[0])
   {
-  // case 100 :{
-  //   parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(PIN_CAPTEUR_1));
-  //   lenghtOnRequest = 2;
-  //   break;
-  // }
 
   case 101 :{
     parameterToArray(onRequestData,BUFFERONREQUESTSIZE,"2%d",!digitalRead(SERVO1));

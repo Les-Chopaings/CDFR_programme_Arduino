@@ -301,7 +301,7 @@ void receiveEvent(int numBytes) {
     //STEPPER 1 ENABLE
     int enable = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
-    digitalWrite(STEPPER1_ENABLE, enable);
+    digitalWrite(STEPPER1_ENABLE, !enable);
     break;
   }
 

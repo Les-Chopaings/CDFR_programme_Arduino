@@ -31,6 +31,16 @@ int ServoPlus::get(){
   return sCurrentAngle;
 }
 
+void ServoPlus::enable(bool b){
+  if(b){
+    servo.attach(sPin);
+    write(sDefaultAngle);
+  }
+  else{
+    servo.detach();
+  }
+}
+
 ServoPlus::~ServoPlus(){
 }
 

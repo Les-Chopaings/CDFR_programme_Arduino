@@ -337,6 +337,22 @@ void receiveEvent(int numBytes) {
     break;
   }
 
+  case 50:{
+    int enable = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
+    slider1->enable(enable);
+    slider2->enable(enable);
+    slider3->enable(enable);
+    slider4->enable(enable);
+    rotation1->enable(enable);
+    rotation2->enable(enable);
+    rotation3->enable(enable);
+    rotation4->enable(enable);
+    bascule->enable(enable);
+    temp->enable(enable);
+    break;
+  }
+
   case 200:{
     //TEST
     countCommande++;

@@ -17,6 +17,7 @@ public:
   void setup();
   void write(int angle, bool skipCheck = false);
   int get();
+  void enable(bool b);
   void setFunctionChecker(int (*check)(int));
   ~ServoPlus();
 };

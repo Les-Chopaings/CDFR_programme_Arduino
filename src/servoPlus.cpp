@@ -10,7 +10,7 @@ ServoPlus::ServoPlus(int pin, int defaultAngle, int mapMin, int mapMax){
 
 void ServoPlus::setup(){
   servo.attach(sPin);
-  write(sDefaultAngle);
+  write(sDefaultAngle, true);
 }
 
 void ServoPlus::write(int angle, bool skipCheck){
@@ -34,7 +34,7 @@ int ServoPlus::get(){
 void ServoPlus::enable(bool b){
   if(b){
     servo.attach(sPin);
-    write(sDefaultAngle);
+    write(sDefaultAngle, true);
   }
   else{
     servo.detach();

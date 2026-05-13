@@ -31,21 +31,21 @@ int pomp_list[] = {POMPE1, POMPE2, POMPE3, POMPE4};
 int toggle = 1;
 
 int limitWithSlider1(int angle) {
-  angle = (angle > slider2->get()) ? slider2->get() : angle;
+  angle = (angle-15 > slider2->get()) ? slider2->get() : angle;
   return angle;
 }
 int limitWithSlider2(int angle) {
-  angle = (angle > slider3->get()) ? slider3->get() : angle;
-  angle = (angle < slider1->get()) ? slider1->get() : angle;
+  angle = (angle-15 > slider3->get()) ? slider3->get() : angle;
+  angle = (angle+15 < slider1->get()) ? slider1->get() : angle;
   return angle;
 }
 int limitWithSlider3(int angle) {
-  angle = (angle > slider4->get()) ? slider4->get() : angle;
-  angle = (angle < slider2->get()) ? slider2->get() : angle;
+  angle = (angle-15 > slider4->get()) ? slider4->get() : angle;
+  angle = (angle+15 < slider2->get()) ? slider2->get() : angle;
   return angle;
 }
 int limitWithSlider4(int angle) {
-  angle = (angle < slider3->get()) ? slider3->get() : angle;
+  angle = (angle+15 < slider3->get()) ? slider3->get() : angle;
   return angle;
 }
 
@@ -127,17 +127,6 @@ void setup() {
   rotation2->setFunctionChecker(limitWithRotation2);
   rotation3->setFunctionChecker(limitWithRotation3);
   rotation4->setFunctionChecker(limitWithRotation4);
-
-  slider1->write(90);
-  slider2->write(90);
-  slider3->write(90);
-  slider4->write(90);
-  rotation1->write(0);
-  rotation2->write(0);
-  rotation3->write(0);
-  rotation4->write(0);
-  bascule->write(0);
-  temp->write(0);
 
   Wire.begin(100);
   Wire.setTimeout(1000);

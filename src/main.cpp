@@ -108,6 +108,8 @@ void setup() {
   pinMode(MOSFET3, OUTPUT);
   pinMode(MOSFET4, OUTPUT);
 
+  pinMode(14, OUTPUT);
+
   slider1->setup();
   slider2->setup();
   slider3->setup();
@@ -323,6 +325,14 @@ void receiveEvent(int numBytes) {
     int enable = 0;
     arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
     digitalWrite(POMPE4, enable);
+    break;
+  }
+
+  case 40:{
+    //LED
+    int enable = 0;
+    arrayToParameter(onReceiveData+1,BUFFERONRECEIVESIZE,"2%d",&enable);
+    digitalWrite(14, enable);
     break;
   }
 
